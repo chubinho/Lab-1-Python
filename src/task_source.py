@@ -5,5 +5,3 @@ from task import Task
 class TaskSource(Protocol):
     def get_task(self) -> list[Task]:
         pass
-
-
