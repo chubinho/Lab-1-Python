@@ -1,6 +1,8 @@
 import json
 import pytest
 from src.sources.file_source import FileSource
+from src.sources.generator_source import GeneratorConfig, GeneratorSource
+from src.sources.api_mock_source import APIMockSource
 
 
 class TestFileSource:
@@ -47,3 +49,41 @@ class TestFileSource:
 
         with pytest.raises(ValueError):
             source.get_task()
+
+
+class TestGeneratorSource:
+    def test_len_default_count(self):
+        """Проверка количества задач"""
+        source = GeneratorSource()
+        tasks = source.get_task()
+
+        assert len(tasks) == 5
+
+    def test_custom_count(self):
+        """Проверка на задавание количества задач"""
+        config = GeneratorConfig(count=21)
+        source = GeneratorSource(config)
+        tasks = source.get_task()
+
+        assert len(tasks) == 21
+
+    def test_prefix_in_task_id(self):
+        """Префикс должен быть в начале id задачи"""
+        config = GeneratorConfig(count=3, prefix="my_prefix_")
+        source = GeneratorSource(config)
+        tasks = source.get_task()
+
+        assert tasks[0].id.startswith("my_prefix_")
+
+    def test_negative_count_raises_error(self):
+        """Проверка правильности количества"""
+        with pytest.raises(ValueError):
+            GeneratorConfig(count=-5)
+
+    def test_zero_count_returns_empty(self):
+        """Отсутствие задач"""
+        config = GeneratorConfig(count=0)
+        source = GeneratorSource(config)
+        tasks = source.get_task()
+
+        assert len(tasks) == 0
