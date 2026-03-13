@@ -6,7 +6,6 @@ from src.sources.api_mock_source import APIMockSource
 
 
 class TestFileSource:
-
     def test_load_tasks_from_json(self, tmp_path):
         """Загружаем задачи из нормального JSON-файла"""
         test_file = tmp_path / "tasks.json"
@@ -84,6 +83,43 @@ class TestGeneratorSource:
         """Отсутствие задач"""
         config = GeneratorConfig(count=0)
         source = GeneratorSource(config)
+        tasks = source.get_task()
+
+        assert len(tasks) == 0
+
+
+class TestAPIMockSource:
+    def test_default_tasks_count(self):
+        """Проверка количеста задач по умолчанию"""
+        source = APIMockSource()
+        tasks = source.get_task()
+
+        assert len(tasks) == 3
+
+    def test_custom_tasks_data(self):
+        """Проверка передач своих данных"""
+        custom = [
+            {"id": "custom_1", "payload": {"test": True}},
+            {"id": "custom_2", "payload": {"test": '131315415'}},
+        ]
+        source = APIMockSource(tasks_data=custom)
+        tasks = source.get_task()
+
+        assert len(tasks) == 2
+        assert tasks[0].id == "custom_1"
+        assert tasks[1].payload == {"test": '131315415'}
+
+    def test_missing_field_in_custom_data(self):
+        """Отсутствие payload"""
+        invalid = [{"id": "1"}]
+        source = APIMockSource(tasks_data=invalid)
+
+        with pytest.raises(KeyError):
+            source.get_task()
+
+    def test_empty_tasks_list(self):
+        """Пустой список"""
+        source = APIMockSource(tasks_data=[])
         tasks = source.get_task()
 
         assert len(tasks) == 0
