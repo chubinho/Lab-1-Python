@@ -46,7 +46,7 @@ class FileSource:
             tasks = []
             for task_data in data:
                 task = Task(
-                    id=task_data['id'],
+                    id=str(task_data['id']),
                     payload=task_data['payload']
                 )
                 tasks.append(task)
